@@ -1,1 +1,228 @@
-
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Coffee_Machine</title>
+    <style>
+    
+        body{
+            background-image: url(/img/coffee_background.png);
+            color: white;
+            overflow: hidden;
+        }
+        
+        .container{
+            background: rgb(0,0,0,.8);
+        }
+        
+        .coffee_btn{
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            background: green;
+            border: 2px solid blue;
+            border-radius: 50px 50px 50px 50px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+        
+        .coffee_btn:active{
+            background: #144405;
+        }
+        
+        .container span{
+            color: white;
+            text-align: center;
+            font-size: 1.3em;
+        }
+        
+        .display{
+            width: 210px;
+            height:200px;
+            border: 2px solid #696969;
+            background: black;
+            color: #00FF00;
+            text-align: center;
+            padding: 10px 5px;
+        }
+        
+        #displayText{
+            color: #00FF00;
+            font-size: 16px;
+        }
+        
+        #balance{
+            color: #00FF00;
+            font-size: 16px;
+        }
+        
+        .banknote{
+            width: 350px;
+            cursor: pointer;
+        }
+        
+        .bill{
+            width: 200px;
+            height:200px;
+        }
+        
+        .progress{
+            background: black;
+        }
+        
+        .changeBox{
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(to bottom right, black, gray);
+            border: 2px solid LightGray;
+            position: relative;
+        }
+        
+        [src$="1rub.png"],[src$="2rub.png"],[src$="5rub.png"],[src$="10rub.png"]{
+            width: 60px;
+            height: 60px;
+            position: absolute;
+            cursor: pointer;
+        }
+        
+        [src$="1rub.png"],[src$="2rub.png"],[src$="5rub.png"],[src$="10rub.png"]:hover{
+            filter: brightness(150%);
+        }
+        
+        .coffeeCup{
+            width: 100px;
+            height: 200px;
+        }
+        
+        
+        
+    </style>
+  </head>
+  <body>
+    
+    <div class="container">
+        <div class="row my-5">
+            <div class="col-sm-6 my-5">
+                <div class="coffee_btn mx-3" onclick="getCoffee('американо', 55)"></div>
+                <span>Американо - 55 рублей</span>
+                <br>
+                <div class="coffee_btn mx-3 my-3" onclick="getCoffee('эспрессо', 73)"></div>
+                <span>Эспрессо - 73 рубля</span>
+                <br>
+                <div class="coffee_btn mx-3" onclick="getCoffee('двойной эспрессо', 97)"></div>
+                <span>Двойной эспрессо - 97 рублей</span>
+            </div>
+            <div class="col-sm-3 my-5">
+                <div class="display mb-2" id="display">
+                    <span id="displayText">Выберите напиток</span>
+                        <div class="progress mt-3">
+                             <div class="progress-bar" hidden role="progressbar" style="width: 25%; background: green;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                </div>
+                <input class="mx-3" type="text" id="money" readonly>
+                <button class="btn btn-success mx-5 mt-2" onclick="getChange(money.value);">Выдать сдачу</button>
+                <img src="/img/coffeeCup.png" hidden class="coffeeCup mx-5 mt-2" alt="">
+            </div>
+            <div class="col-sm-3 my-5">
+                <img src="/img/bill_acc.png" alt="bill_acc" class="bill" id="bill">
+                <div class="changeBox my-3" id="changeBox"></div>
+            </div>
+            <div class="row mx-4 py-3">
+                <img src="/img/50rub.png" alt="50" class="banknote" data-value="50">
+                <img src="/img/100rub.png" alt="100" class="banknote" data-value="100">
+                <img src="/img/200rub.png" alt="200" class="banknote" data-value="200">
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    
+        let money = document.getElementById('money');  //инпут для отображения текущего баланса
+        let display = document.getElementById('display');  //дисплей
+        let displayText = document.getElementById('displayText');  //текущая инофрмация на дисплее
+        let progBar = document.querySelector('.progress-bar');  //прогрессбар приготовления напитка
+        let coffeeCup = document.querySelector('.coffeeCup');  //кружка кофе
+        
+        function getCoffee(coffeeName, coffeePrice){  //функция, вызываемая при заказе кофе
+            if(money.value>=coffeePrice){  //если текущий баланс больше или равен сумме заказанного кофе
+                coffeeCup.hidden = true;  //изначально кружка hidden и появляется только при завершении приготовления
+                let i = 0;  //переменная-счетчик для увеличения прогрессбара
+                let coffeeTimer = setInterval(function(){  //таймер, включается при приготовлении кофе, увеличивает прогрессбар...
+                    displayText.innerText = `Ваш ${coffeeName} готовится!`; //и выводит на дисплей информацию о приготовлении выбранного напитка
+                    progBar.hidden = false;  //изначально прогрессбар hidden и появляется при начале приготовления
+                    progBar.style.width = (++i)+'%';  //увеличение значения прогрессбара с помощью инкрементирования переменной
+                    if(i==120){  // если прогрессбар заполнился...
+                        progBar.hidden = true;  //то он пропадает
+                        coffeeCup.hidden = false; //появляется кружка кофе
+                        displayText.innerText = `Ваш ${coffeeName} готов, с вас ${coffeePrice} рублей!`;  //отображается информация что кофе готов
+                        clearInterval(coffeeTimer)  //сбрасывается таймер
+                        i = 0;  //обнуляется переменная
+                        progBar.style.width = 0+'%';  //обнуляется прогрессбар
+                    }
+                }, 40);  //интервал вызова кода
+                money.value = money.value-coffeePrice;  //с баланса списывается сумма стоимости кофе
+            }else{
+                displayText.innerText = `Недостаточно средств, внесите еще ${coffeePrice-money.value} рублей!`;  //если баланса не хватает, то выводится недостающая сумма
+            }
+        }
+            
+        let changeBox = document.getElementById('changeBox');  //лоток для выдачи сдачи
+        function getChange(currency){  //функция для выдачи сдачи
+            while(currency>0){  //до тех пор пока сумма сдачи больше нуля
+                let change=0;  //переменная, в которую кладется нужный номинал на каждой иттерации цикла
+                let top = (Math.random()*changeBox.offsetHeight)-60;  //css для позиционирования монет внутри лотка
+                let left = (Math.random()*changeBox.offsetWidth)-60;  //css для позиционирования монет внутри лотка
+                if(currency>=10) change=10;  //если сумма сдачи больше или равна десяти, то переменная change=10 и в лоток для сдачи попадает картинка номиналом 10 рублей
+                else if(currency>=5) change=5;  //если сумма сдачи больше или равна пяти, то переменная change=5 и в лоток для сдачи попадает картинка номиналом 5 рублей
+                else if(currency>=2) change=2;  //и так далее с картинкой два рубля
+                else if(currency>=1) change=1;  //и один рубль, на каждой иттерации
+                changeBox.innerHTML += `<img class="coin" src="/img/${change}rub.png" style="top: ${top}px; left: ${left}px;">`; //добаляем в разметку changebox'а разметку картинок, необходимый номинал берём из переменной change
+                currency = currency-change;  //вычитаем из общей суммы сдачи сумму только что выданной монеты
+            }
+            let coins = document.getElementsByClassName('coin');  //собираем все монеты из changebox'а в массив
+            for(i=0;i<coins.length;i++){ //перебираем массив циклом
+                let coin = coins[i];
+                coin.onclick = function(){  //теперь при onclick'е на каждой монетке вызывается функция
+                    coin.hidden = true;  //которая прячет ее
+                }
+            }
+            money.value = 0;  //обнуляем баланс
+        }
+        
+        let banknotes = document.querySelectorAll('[src$="rub.png"]');  //купюры для оплаты
+        let bill = document.getElementById('bill');  //купюроприёмник
+        
+        //следующий код реализует drag'n'drop для купюр и если они попадают в область купюроприёмника, то купюра исчезает и её номинал пишется в текущий баланс
+        for(i=0;i<banknotes.length;i++){  //цикл для перебора массива купюр
+            let banknote = banknotes[i];
+            banknote.onmousedown = function(){  //при onmousedown на купюре вызывается фунция
+                banknote.style.position = "absolute";  //в котрой купюра абсюлютно позиционируется для свободного перемещения относительно других элементов
+                banknote.style.transform = "rotate(90deg)";  //и преворачивается на 90 градусов
+                banknote.ondragstart = function(){return false};  //отмена стандартного drag'n'drop'а браузера
+              document.onmousemove = function(event){  //при движении мыши на странице
+                  banknote.style.top = event.clientY - banknote.offsetHeight/2 +"px";  //купюра ценнтруется под курсор по оси x и y
+                  banknote.style.left = event.clientX - banknote.offsetWidth/2 +"px";  //купюра ценнтруется под курсор по оси x и y
+                  
+                  let bill_top = bill.getBoundingClientRect().top;  //координаты купюроприёмника, верх
+                  let bill_left = bill.getBoundingClientRect().left;  //координаты купюроприёмника, левый край
+                  let bill_right = bill.getBoundingClientRect().right;  //координаты купюроприёмника, правый край
+                  let bill_bottom = bill.getBoundingClientRect().bottom-(2/3*bill.height);  //в данном случае берётся 2/3 от низа, что бы купюра исчезала только в верхней части купюроприёмника
+                  let banknote_top = banknote.getBoundingClientRect().top;  //координаты купюры, верх
+                  let banknote_left = banknote.getBoundingClientRect().left;  //координаты купюры, левый край
+                  let banknote_right = banknote.getBoundingClientRect().right;  //координаты купюры, правый край
+                  if(bill_top<banknote_top && bill_left<banknote_left && bill_right>banknote_right && bill_bottom>banknote_top){  //если координаты купюры попадают в координаты купюроприёмника
+                      banknote.hidden = true;  //то купюра исчезает
+                      money.value = +money.value + (+banknote.dataset.value);  //и текущий баланс пополняется на сумму номинала купюры(реализованна с помощью атрибута dataset в html)
+                  }
+                }
+              banknote.onmouseup = function(){  //при поднятии курсора с купюры запускается функция...
+                  document.onmousemove = function(){return false};  //которая отключает предыдущую функцию, реализующую перемещение купюры
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  </body>
+</html>
